@@ -1,0 +1,43 @@
+name: Build mod
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 9.2.0
+
+      - name: Unpack source zip
+        run: |
+          ls -la
+          unzip -oq aibots-mod-src.zip -d /tmp/unz
+          rm -rf src
+          cp -r /tmp/unz/aibots/src ./src
+          cp /tmp/unz/aibots/build.gradle /tmp/unz/aibots/settings.gradle /tmp/unz/aibots/gradle.properties .
+          echo "=== java sources ==="
+          find src -name '*.java'
+          echo "=== resources ==="
+          ls src/main/resources
+
+      - run: gradle build --stacktrace
+
+      - name: Show jar contents
+        run: |
+          for f in build/libs/*.jar; do echo "--- $f"; unzip -l "$f" | head -40; done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aibots-mod-jar
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
