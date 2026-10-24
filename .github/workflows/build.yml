@@ -20,7 +20,9 @@ jobs:
       - name: Unpack source zip
         run: |
           ls -la
-          unzip -oq aibots-mod-src.zip -d /tmp/unz
+          ZIP="$(ls *.zip | head -1)"
+          echo "Using zip: $ZIP"
+          unzip -oq "$ZIP" -d /tmp/unz
           rm -rf src
           cp -r /tmp/unz/aibots/src ./src
           cp /tmp/unz/aibots/build.gradle /tmp/unz/aibots/settings.gradle /tmp/unz/aibots/gradle.properties .
